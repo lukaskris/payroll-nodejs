@@ -42,13 +42,10 @@ REST.prototype.configureExpress = function(connection) {
 }
 
 REST.prototype.handleRoutes= function(router,connection,md5) {
-    router.get("/",function(req,res){
-        res.json({"Message" : "Hello World !"});
-    });
 
    /*	USER	*/
     router.post("/employee",function(req,res){
-		var queryfind = "SELECT * FROM customer where email = '"+req.body.email+"' ORDER BY email LIMIT 1";
+		var queryfind = "SELECT * FROM employee where email = '"+req.body.email+"' ORDER BY email LIMIT 1";
 		connection.query(queryfind, function(error,result){
 			if(error){
 				res.status(error.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + error});
@@ -78,6 +75,25 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
 
     });
 
+    //====******************************===//
+    //             Employee                //
+
+    router.get("/employee/:filter/:limit/:offset/:order",function(req,res){
+        var query = "SELECT * FROM ?? ORDER BY "+ req.params.order +" LIMIT ? OFFSET ? ";
+        if(req.params.filter != "*"){
+            query = "SELECT * FROM ?? WHERE "+ req.params.filter +" ORDER BY "+ req.params.order +" LIMIT ? OFFSET ? ";
+        }
+        var table = ["karyawan", parseInt(req.params.limit), parseInt(req.params.offset)];
+        query = mysql.format(query,table);
+        connection.query(query,function(err,rows){
+            if(err) {
+                res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
+            } else {
+                res.json(rows);
+            }
+        });
+    });
+
     router.get("/employee",function(req,res){
         var query = "SELECT * FROM ??";
         var table = ["karyawan"];
@@ -105,168 +121,21 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
     });
 
     router.put("/employee",function(req,res){
-        var query = "UPDATE ?? SET ?? = ? WHERE ?? = ?";
-        var table = ["karyawan","password",md5(req.body.password),"email",req.body.email];
+        var query = "UPDATE ?? SET ?? = ?, ?? = ?, ?? =?, ??=? WHERE ?? = ?";
+        var table = ["karyawan","nama", req.body.nama, "bagian_id", req.body.bagian_id ,"gajiharian", req.body.gajiharian ,"gajitotal", req.body.gajitotal, "nik", req.body.nik];
         query = mysql.format(query,table);
         connection.query(query,function(err,rows){
             if(err) {
                 res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
             } else {
-                res.json({"Error" : false, "Message" : "Updated the password for email "+req.body.email});
+                res.json({"Error" : false, "Message" : "Updated employee for nik "+req.body.nik});
             }
         });
     });
 
-    router.put("/token",function(req,res){
-        var query = "UPDATE ?? SET ??=? WHERE ?? = ?";
-
-        var table = ["customer","firebasetoken",req.body.firebasetoken,"email",req.body.email];
-
-        query = mysql.format(query,table);
-        connection.query(query,function(err,rows){
-            if(err) {
-                res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
-            } else {
-                res.json({"Error" : false, "Message" : "Updated profile"});
-            }
-        });
-    });
-
-    router.put("/profile",function(req,res){
-        var query = "UPDATE ?? SET ??=?, ??=?, ??=?, ??=?, ??=? WHERE ?? = ?";
-
-        var table = ["customer","name",req.body.name,"phone",req.body.phone,"datebirth",new Date(req.body.datebirth),"gender",req.body.gender,"firebasetoken",req.body.firebasetoken,"email",req.body.email];
-
-        query = mysql.format(query,table);
-        connection.query(query,function(err,rows){
-            if(err) {
-                res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
-            } else {
-                res.json({"Error" : false, "Message" : "Updated profile"});
-            }
-        });
-    });
-
-    router.delete("/customer/:email",function(req,res){
-        var query = "DELETE from ?? WHERE ??=?";
-        var table = ["customer","email",req.params.email];
-        query = mysql.format(query,table);
-        connection.query(query,function(err,rows){
-            if(err) {
-                res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
-            } else {
-                res.json({"Error" : false, "Message" : "Deleted the user with email "+req.params.email});
-            }
-        });
-    });
-
-    router.get("/category",function(req,res){
-        var query = "SELECT * FROM ??";
-        var table = ["category"];
-        query = mysql.format(query,table);
-        connection.query(query,function(err,rows){
-            if(err) {
-                res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
-            } else {
-                res.json(rows);
-            }
-        });
-    });
-
-    router.get("/items",function(req,res){
-        var query = "SELECT * FROM ??";
-        var table = ["item_view"];
-        query = mysql.format(query,table);
-        connection.query(query,function(err,rows){
-            if(err) {
-                res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
-            } else {
-                res.json(rows);
-            }
-        });
-    });
-
-    router.get("/item/:category/:offset/:limit",function(req,res){
-        var query = "SELECT * FROM ?? WHERE category_id = ? ORDER BY created_at desc LIMIT ? OFFSET ? ";
-        var table = ["item", parseInt(req.params.category), parseInt(req.params.limit), parseInt(req.params.offset)];
-
-        query = mysql.format(query,table);
-        connection.query(query,function(err,rows){
-            if(err) {
-                res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
-            } else {
-                res.json(rows);
-            }
-        });
-    });
-
-    router.get("/item/:category/:offset/:limit/:filter/:order",function(req,res){
-        var query = "SELECT * FROM ?? WHERE category_id = ? ORDER BY "+ req.params.order +" LIMIT ? OFFSET ? ";
-        if(req.params.filter != "*"){
-            query = "SELECT * FROM ?? WHERE category_id = ? and "+ req.params.filter +" ORDER BY "+ req.params.order +" LIMIT ? OFFSET ? ";
-        }
-
-        var table = ["item", parseInt(req.params.category), parseInt(req.params.limit), parseInt(req.params.offset)];
-
-        query = mysql.format(query,table);
-
-        connection.query(query,function(err,rows){
-            if(err) {
-                res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
-            } else {
-                res.json(rows);
-            }
-        });
-    });
-
-
-	router.get("/search_item/:key/:offset/:limit/:filter/:order",function(req,res){
-        var query = "SELECT * FROM ?? WHERE ?? like ? ORDER BY "+ req.params.order +" LIMIT ? OFFSET ? ";
-
-        if(req.params.filter != "*"){
-            query = "SELECT * FROM ?? WHERE ?? like ? and "+ req.params.filter +" ORDER BY "+ req.params.order +" LIMIT ? OFFSET ? ";
-        }
-        var table = ["item", "name", "%"+req.params.key+"%" , parseInt(req.params.limit), parseInt(req.params.offset)];
-
-        query = mysql.format(query,table);
-        connection.query(query,function(err,rows){
-            if(err) {
-                res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
-            } else {
-                res.json(rows);
-            }
-        });
-    });
-
-    router.get("/sub_item/:id",function(req,res){
-        var query = "SELECT * FROM ?? WHERE ??=?";
-        var table = ["sub_item", "item_id", req.params.id];
-        query = mysql.format(query,table);
-        connection.query(query,function(err,rows){
-            if(err) {
-                res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
-            } else {
-                res.json(rows);
-            }
-        });
-    });
-
-    router.post("/shipping_address",function(req,res){
-        var query = "INSERT INTO ??(??,??,??,??,??,??,??,??,??,??,??,??) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
-        var table = ["shippingaddress","name","address","province","province_id","city","city_id","subdistrict","subdistrict_id","postal_code","phone","status","email",
-                     req.body.name, req.body.address, req.body.province, req.body.province_id, req.body.city, req.body.city_id, req.body.subdistrict, req.body.subdistrict_id, req.body.postal_code, req.body.phone, req.body.status, req.body.email];
-        query = mysql.format(query,table);
-        connection.query(query,function(err,rows){
-            if(err) {
-                res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
-            } else {
-                res.json({"Error" : false, "Message" : "Shipping Address Added!"});
-            }
-        });
-    });
-
-    router.post("/addkaryawan", upload.single('fingerprint'), function(req,res){
+    router.post("/employee", upload.single('fingerprint'), function(req,res){
         var query="INSERT INTO ??(??,??,??,??,??,??) values(?,?,?,?,?,?)";
+
         var buffer = null;
         if(req.file){
           buffer = req.file.buffer;
@@ -282,35 +151,25 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
         });
     });
 
-	router.delete("/shipping_address/:id",function(req,res){
-		var query = "DELETE FROM ?? WHERE ??=?";
-		var table = ["shippingaddress","id",req.params.id];
-		query = mysql.format(query,table);
-        connection.query(query,function(err,rows){
-            if(err) {
-                res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
-            } else {
-                res.json({"Error" : false, "Message" : "Shipping Address Deleted!"});
-            }
-        });
-	});
-
-    router.put("/shipping_address/:id",function(req,res){
-        var query = "UPDATE ?? SET status='1' WHERE ??=? and ??=?";
-        var table = ["shippingaddress","id",req.params.id, "email", req.body.email];
+    router.delete("/employee/:id",function(req,res){
+        var query = "DELETE from ?? WHERE ??=?";
+        var table = ["karyawan","nik",req.params.id];
         query = mysql.format(query,table);
         connection.query(query,function(err,rows){
             if(err) {
                 res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
             } else {
-                res.json({"Error" : false, "Message" : "Shipping Address Updated!"});
+                res.json({"Error" : false, "Message" : "Deleted the karyawan with id "+req.params.nik});
             }
         });
     });
 
-    router.get("/shipping_address/:id",function(req,res){
-        var query = "SELECT * FROM ?? WHERE ??=? order by status desc";
-        var table = ["shippingaddress", "email", req.params.id];
+    //====******************************===//
+    //             Position                //
+
+    router.get("/position",function(req,res){
+        var query = "SELECT * FROM ??";
+        var table = ["bagian"];
         query = mysql.format(query,table);
         connection.query(query,function(err,rows){
             if(err) {
@@ -321,22 +180,24 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
         });
     });
 
-    router.get("/shipping_address/:email/:id",function(req,res){
-        var query = "SELECT * FROM ?? WHERE ??=? and ??=? order by status desc";
-        var table = ["shippingaddress", "email", req.params.email, "id", req.params.id];
+    router.delete("/position/:id",function(req,res){
+        var query = "DELETE from ?? WHERE ??=?";
+        var table = ["position","bagian_id",req.params.id];
         query = mysql.format(query,table);
         connection.query(query,function(err,rows){
             if(err) {
                 res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
             } else {
-                res.json(rows[0]);
+                res.json({"Error" : false, "Message" : "Deleted the position with id "+req.params.id});
             }
         });
     });
 
-    router.get("/default_shipping_address/:id",function(req,res){
-        var query = "SELECT * FROM ?? WHERE ??=? AND STATUS=1";
-        var table = ["shippingaddress", "email", req.params.id];
+    //====******************************===//
+    //         Report New Employee         //
+    router.get("/reportnewemployee",function(req,res){
+        var query = "SELECT * FROM ??";
+        var table = ["report_new_employee"];
         query = mysql.format(query,table);
         connection.query(query,function(err,rows){
             if(err) {
@@ -347,6 +208,35 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
         });
     });
 
+    //====******************************===//
+    //            Report Hutang            //
+    router.get("/reporthutang",function(req,res){
+        var query = "SELECT * FROM ??";
+        var table = ["report_hutang"];
+        query = mysql.format(query,table);
+        connection.query(query,function(err,rows){
+            if(err) {
+                res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
+            } else {
+                res.json(rows);
+            }
+        });
+    });
+
+    //====******************************===//
+    //       Report Pinjaman Karyawan      //
+    router.get("/reportpinjamankaryawan",function(req,res){
+        var query = "SELECT * FROM ??";
+        var table = ["report_pinjaman_karyawan"];
+        query = mysql.format(query,table);
+        connection.query(query,function(err,rows){
+            if(err) {
+                res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
+            } else {
+                res.json(rows);
+            }
+        });
+    });
 
     router.post("/orders",function(req,res){
         var query = "INSERT INTO ??(??,??,??) VALUES (?,?,?)";
