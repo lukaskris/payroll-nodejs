@@ -267,8 +267,11 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
 
     router.post("/addkaryawan", upload.single('fingerprint'), function(req,res){
         var query="INSERT INTO ??(??,??,??,??,??,??) values(?,?,?,?,?,?)";
-        console.log(req.file);
-        var table = ["karyawan", "nik", "nama", "bagian_id", "gajiharian", "gajitotal","fingerprint", req.body.nik, req.body.nama, req.body.bagian_id, req.body.gajiharian, req.body.gajitotal, req.file.buffer];
+        var buffer = null;
+        if(req.file){
+          buffer = req.file.buffer;
+        }
+        var table = ["karyawan", "nik", "nama", "bagian_id", "gajiharian", "gajitotal","fingerprint", req.body.nik, req.body.nama, req.body.bagian_id, req.body.gajiharian, req.body.gajitotal, buffer];
         query = mysql.format(query,table);
         connection.query(query,function(err,rows){
             if(err) {
