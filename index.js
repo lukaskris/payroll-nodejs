@@ -43,37 +43,6 @@ REST.prototype.configureExpress = function(connection) {
 
 REST.prototype.handleRoutes= function(router,connection,md5) {
 
-   /*	USER	*/
-    router.post("/employee",function(req,res){
-		var queryfind = "SELECT * FROM employee where email = '"+req.body.email+"' ORDER BY email LIMIT 1";
-		connection.query(queryfind, function(error,result){
-			if(error){
-				res.status(error.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + error});
-			}
-			if(result.length>0){
-				res.json(result[0]);
-			}else{
-				var query = "INSERT INTO ??(??,??,??,??,??) VALUES (?,?,?,?,?)";
-				var table = ["customer","name","email","phone","password","picture",req.body.name, req.body.email,req.body.phone,md5(req.body.password),req.body.picture];
-				query = mysql.format(query,table);
-				connection.query(query,function(err,rows){
-					if(err) {
-						res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
-					} else {
-						connection.query(queryfind,function(e,r){
-							if(!err){
-								res.json(r[0]);
-							}
-						});
-
-					}
-				});
-			}
-
-		});
-
-
-    });
 
     //====******************************===//
     //             Employee                //
@@ -86,7 +55,6 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
         }
         var table = ["karyawan", parseInt(req.params.limit), parseInt(req.params.offset)];
         query = mysql.format(query,table);
-        console.log(query);
         connection.query(query,function(err,rows){
             if(err) {
                 res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
@@ -112,7 +80,7 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
 
     router.put("/employee",function(req,res){
         var query = "UPDATE ?? SET ?? = ?, ?? = ?, ?? =?, ??=? WHERE ?? = ?";
-        var table = ["karyawan","nama", req.body.nama, "bagian_id", req.body.bagian_id ,"gajiharian", req.body.gajiharian ,"gajitotal", req.body.gajitotal, "nik", req.body.nik];
+        var table = ["karyawan","nama", req.body.name, "bagian_id", req.body.position ,"gajiharian", req.body.salaryperday ,"gajitotal", req.body.salary, "nik", req.body.nik];
         query = mysql.format(query,table);
         connection.query(query,function(err,rows){
             if(err) {
@@ -151,7 +119,6 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
 
     router.post("/employee", upload.single('fingerprint'), function(req,res){
         var query="INSERT INTO ??(??,??,??,??,??,??,tanggal_masuk) values(?,?,?,?,?,?, now())";
-
         var buffer = null;
         if(req.file){
           buffer = req.file.buffer;
@@ -175,7 +142,7 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
             if(err) {
                 res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
             } else {
-                res.json({"Error" : false, "Message" : "Deleted the karyawan with id "+req.params.nik});
+                res.json({"Error" : false, "Message" : "Deleted the karyawan with id "+req.params.id});
             }
         });
     });
