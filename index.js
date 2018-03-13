@@ -79,12 +79,14 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
     //             Employee                //
 
     router.get("/employee/:filter/:limit/:offset/:order",function(req,res){
-        var query = "SELECT * FROM ?? ORDER BY "+ req.params.order +" LIMIT ? OFFSET ? ";
+        var query = "SELECT nik, nama as name, bagian_id as position, gajiharian as salaryperday, gajitotal as salary, pinjamperiodelalu as debtpreviousperiode, saldo as balance, tanggal_masuk as `join`, tanggal_keluar as `out` FROM ?? where tanggal_keluar is null ORDER BY "+ req.params.order +" LIMIT ? OFFSET ? ";
         if(req.params.filter != "*"){
-            query = "SELECT * FROM ?? WHERE "+ req.params.filter +" ORDER BY "+ req.params.order +" LIMIT ? OFFSET ? ";
+
+            query = "SELECT * FROM ?? WHERE  tanggal_keluar is null and "+ req.params.filter +" ORDER BY "+ req.params.order +" LIMIT ? OFFSET ? ";
         }
         var table = ["karyawan", parseInt(req.params.limit), parseInt(req.params.offset)];
         query = mysql.format(query,table);
+        console.log(query);
         connection.query(query,function(err,rows){
             if(err) {
                 res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
@@ -94,18 +96,6 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
         });
     });
 
-    router.get("/employee",function(req,res){
-        var query = "SELECT * FROM ??";
-        var table = ["karyawan"];
-        query = mysql.format(query,table);
-        connection.query(query,function(err,rows){
-            if(err) {
-                res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
-            } else {
-                res.json(rows);
-            }
-        });
-    });
 
     router.get("/employee/:id",function(req,res){
         var query = "SELECT * FROM ?? WHERE nik=?";
@@ -133,8 +123,34 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
         });
     });
 
+    router.get("/history_potongan/:id", function(req,res){
+        var query = "SELECT karyawan_id as nik, potongan as cut, hutang as debt, periode FROM history_potongan where karyawan_id = ?";
+        var table = [req.body.id];
+        query = mysql.format(query, table);
+        connection.query(query, function(err, rows){
+           if(err){
+              res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
+           }else {
+              res.json(rows);
+           }
+        });
+    });
+
+    router.get("/history_pinjaman/:id", function(req,res){
+        var query = "SELECT karyawan_id as nik, pinjaman as borrow, sudah_umk as debt, periode FROM history_potongan where nik = ?";
+        var table = [req.body.id];
+        query = mysql.format(query, table);
+        connection.query(query, function(err, rows){
+           if(err){
+              res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
+           }else {
+              res.json(rows);
+           }
+        });
+    });
+
     router.post("/employee", upload.single('fingerprint'), function(req,res){
-        var query="INSERT INTO ??(??,??,??,??,??,??) values(?,?,?,?,?,?)";
+        var query="INSERT INTO ??(??,??,??,??,??,??,tanggal_masuk) values(?,?,?,?,?,?, now())";
 
         var buffer = null;
         if(req.file){
