@@ -147,17 +147,31 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
         });
     });
 
-    router.post("/employee", upload.single('fingerprint'), function(req,res){
-        var query="INSERT INTO ??(??,??,??,??,??,??,tanggal_masuk) values(?,?,?,?,?,?, now())";
+    router.post("/employee", function(req,res){
+        var query="INSERT INTO ??(??,??,??,??,??,tanggal_masuk) values(?,?,?,?,?, now())";
+        var table = ["karyawan", "nik", "nama", "bagian_id", "gajiharian", "gajitotal", req.body.nik, req.body.name, req.body.position, req.body.salaryPerDay, req.body.salary];
+        query = mysql.format(query,table);
+        connection.query(query,function(err,rows){
+            if(err) {
+                res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
+            } else {
+                res.json({"Error" : false, "Message" : "Karyawan Added!"});
+            }
+        });
+    });
+
+    router.post("/uploadfinger/:id", upload.single('fingerprint'), function(req,res){
+        var query = "UPDATE karyawan SET fingerprint = ? where nik = ?";
         var buffer = null;
         if(req.file){
           buffer = req.file.buffer;
         }
 
-        var table = ["karyawan", "nik", "nama", "bagian_id", "gajiharian", "gajitotal","fingerprint", req.body.nik, req.body.name, req.body.position, req.body.salaryPerDay, req.body.salary, buffer];
+        var table = [buffer, req.params.id];
         query = mysql.format(query,table);
         connection.query(query,function(err,rows){
             if(err) {
+                console.log(err);
                 res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
             } else {
                 res.json({"Error" : false, "Message" : "Karyawan Added!"});
