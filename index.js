@@ -4,9 +4,11 @@ var bodyParser  = require("body-parser");
 var md5 = require('MD5');
 var multer = require('multer');
 var upload = multer();
-var dateFormat = require('dateformat');
 var app  = express();
 var upload  = multer({ storage: multer.memoryStorage() });
+app.use(bodyParser.json({limit:'50mb'}));
+app.use(bodyParser.urlencoded({extended:true, limit: '50mb'}));
+
 
 function REST(){
     var self = this;
