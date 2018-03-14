@@ -51,7 +51,7 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
     //             Employee                //
 
     router.get("/employee/:filter/:limit/:offset/:order",function(req,res){
-        var query = "SELECT nik, nama as name, bagian_id as position, gajiharian as salaryperday, gajitotal as salary, pinjamperiodelalu as debtpreviousperiode, saldo as balance, tanggal_masuk as `join`, tanggal_keluar as `out` FROM ?? ORDER BY "+ req.params.order +" LIMIT ? OFFSET ? ";
+        var query = "SELECT nik, nama as name, bagian_id as position, gajiharian as salaryPerDay, gajitotal as salary, pinjamperiodelalu as debtpreviousperiode, saldo as balance, tanggal_masuk as `join`, tanggal_keluar as `out` FROM ?? ORDER BY "+ req.params.order +" LIMIT ? OFFSET ? ";
         if(req.params.filter != "*"){
             query = "SELECT * FROM ?? WHERE  tanggal_keluar is null and "+ req.params.filter +" ORDER BY "+ req.params.order +" LIMIT ? OFFSET ? ";
         }
@@ -67,7 +67,7 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
     });
 
     router.get("/potongan_karyawan", function(req,res){
-       var query = "SELECT nik, nama as name, bagian_id as position, gajiharian as salaryperday, gajitotal as salary, pinjamperiodelalu as debtpreviousperiode, saldo as balance, tanggal_masuk as `join`, tanggal_keluar as `out`, upah, potongan1, potongan2 from ??";
+       var query = "SELECT nik, nama as name, bagian_id as position, gajiharian as salaryPerDay, gajitotal as salary, pinjamperiodelalu as debtpreviousperiode, saldo as balance, tanggal_masuk as `join`, tanggal_keluar as `out`, upah, potongan1, potongan2 from ??";
        var table = ["karyawan"];
        query = mysql.format(query,table);
        connection.query(query, function(err,rows){
@@ -80,7 +80,7 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
     });
 
     router.get("/employee/:id",function(req,res){
-        var query = "SELECT nik, nama as name, bagian_id as position, gajiharian as salaryperday, gajitotal as salary, pinjamperiodelalu as debtpreviousperiode, saldo as balance, tanggal_masuk as `join`, tanggal_keluar as `out` FROM ?? WHERE nik=?";
+        var query = "SELECT nik, nama as name, bagian_id as position, gajiharian as salaryPerDay, gajitotal as salary, pinjamperiodelalu as debtpreviousperiode, saldo as balance, tanggal_masuk as `join`, tanggal_keluar as `out` FROM ?? WHERE nik=?";
         var table = ["karyawan",req.params.id,req.params.id];
         query = mysql.format(query,table);
         connection.query(query,function(err,rows){
@@ -109,7 +109,7 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
 
     router.put("/employee",function(req,res){
         var query = "UPDATE ?? SET ?? = ?, ?? = ?, ?? =?, ??=? WHERE ?? = ?";
-        var table = ["karyawan","nama", req.body.name, "bagian_id", req.body.position ,"gajiharian", req.body.salaryperday ,"gajitotal", req.body.salary, "nik", req.body.nik];
+        var table = ["karyawan","nama", req.body.name, "bagian_id", req.body.position ,"gajiharian", req.body.salaryPerDay ,"gajitotal", req.body.salary, "nik", req.body.nik];
         query = mysql.format(query,table);
         connection.query(query,function(err,rows){
             if(err) {
@@ -153,7 +153,7 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
         if(req.file){
           buffer = req.file.buffer;
         }
-        
+
         var table = ["karyawan", "nik", "nama", "bagian_id", "gajiharian", "gajitotal","fingerprint", req.body.nik, req.body.name, req.body.position, req.body.salaryPerDay, req.body.salary, buffer];
         query = mysql.format(query,table);
         connection.query(query,function(err,rows){
