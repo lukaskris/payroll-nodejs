@@ -153,7 +153,8 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
         if(req.file){
           buffer = req.file.buffer;
         }
-        var table = ["karyawan", "nik", "nama", "bagian_id", "gajiharian", "gajitotal","fingerprint", req.body.nik, req.body.name, req.body.position, req.body.salaryperday, req.body.salary, buffer];
+        
+        var table = ["karyawan", "nik", "nama", "bagian_id", "gajiharian", "gajitotal","fingerprint", req.body.nik, req.body.name, req.body.position, req.body.salaryPerDay, req.body.salary, buffer];
         query = mysql.format(query,table);
         connection.query(query,function(err,rows){
             if(err) {
@@ -180,8 +181,11 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
     //====******************************===//
     //             Position                //
 
-    router.get("/position",function(req,res){
+    router.get("/position/:filter",function(req,res){
         var query = "SELECT * FROM ??";
+        if(req.params.filter != "*"){
+          query = query + " where " +  req.params.filter;
+        }
         var table = ["bagian"];
         query = mysql.format(query,table);
         connection.query(query,function(err,rows){
