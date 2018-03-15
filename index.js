@@ -125,6 +125,7 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
         // var query = "SELECT karyawan_id as nik, potongan as cut, hutang as debt, periode FROM ?? where " + req.params.filter;
         var table = ["history_potongan"];
         query = mysql.format(query, table);
+        console.log(query);
         connection.query(query, function(err, rows){
            if(err){
               res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
@@ -135,9 +136,10 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
     });
 
     router.get("/history_pinjaman/:filter", function(req,res){
-        var query = "SELECT karyawan_id as nik, pinjaman as borrow, sudah_umk as debt, periode FROM  where "+ req.params.filter;
-        var table = ["history_potongan"];
+        var query = "SELECT karyawan_id as nik, pinjaman, sudah_umk, periode FROM ?? where "+ req.params.filter;
+        var table = ["history_pinjaman"];
         query = mysql.format(query, table);
+        console.log(query);
         connection.query(query, function(err, rows){
            if(err){
               res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
