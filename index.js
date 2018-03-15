@@ -148,8 +148,8 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
     });
 
     router.post("/employee", function(req,res){
-        var query="INSERT INTO ??(??,??,??,??,??,tanggal_masuk) values(?,?,?,?,?, now())";
-        var table = ["karyawan", "nik", "nama", "bagian_id", "gajiharian", "gajitotal", req.body.nik, req.body.name, req.body.position, req.body.salaryPerDay, req.body.salary];
+        var query="INSERT INTO ??(??,??,??,??,??, ??, tanggal_masuk) values(?,?,?,?,?,?,now())";
+        var table = ["karyawan", "nik", "nama", "bagian_id", "gajiharian", "gajitotal", "saldo", req.body.nik, req.body.name, req.body.position, req.body.salaryPerDay, req.body.salary, req.body.balance];
         query = mysql.format(query,table);
         connection.query(query,function(err,rows){
             if(err) {
