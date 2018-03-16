@@ -191,6 +191,17 @@ REST.prototype.handleRoutes= function(router,connection,md5) {
             }
         });
     });
+    router.get("/version",function(req,res){
+        var query = "select * from version";
+        connection.query(query, function(err, rows){
+          if(err) {
+              res.status(err.status || 500).json({"Error" : true, "Message" : "Error executing MySQL query " + err});
+          } else {
+              res.json(rows[0]);
+          }
+        });
+    });
+
 
     //====******************************===//
     //             Position                //
